@@ -48,6 +48,11 @@ Reference files, read at the step that needs them:
 
 ## Step 0: Parse the request
 
+**Always ask the scope first** (one AskUserQuestion, before harvesting anything), unless the user already said it:
+"Only this link, or the full cycle: this link plus every advertiser profile found in it, one folder per profile,
+pulling everything each profile runs?" Recommend the full cycle for keyword searches and for pages that run
+partnership / whitelisted ads (other pages carry part of the volume). The answer decides whether Step 1b runs.
+
 For each link the user gives, decide:
 
 | Decision | Rule |
@@ -73,11 +78,11 @@ grouping. It prints the output folder. Output per folder: `<Name>_NNN.<jpg|png|m
 Sanity checks after each run: collected ≈ what the Library reports for that media type; `INDEX.md` profile table
 has totals (a single `n/a` is fine); a spot-read `.md` has caption + button block. If 0 ads: see troubleshooting.
 
-### Step 1b: Expand to every advertiser (offer it after keyword searches)
+### Step 1b: Expand to every advertiser (when the user chose the full cycle in Step 0)
 
 A keyword search only returns the ads whose text contains the words; each advertiser page holds all of its active
-ads (a persona page found with 3 ads in the search often runs 50-100). After a keyword harvest, offer to expand, or
-do it when asked ("go into each advertiser page", "extract each profile too"):
+ads (a persona page found with 3 ads in the search often runs 50-100). For a single advertiser page, the
+"advertisers found in it" are the persona / creator / publisher pages that run its partnership ads:
 
 ```bash
 python "<skill_dir>/scripts/harvest.py" --pages-from "<keyword harvest folder>" --lang pt|en [--media image] [--country ALL]

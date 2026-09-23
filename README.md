@@ -154,6 +154,21 @@ python harvest.py --pages-from "spy/Acme Image Ads 23.09.2026" --lang pt --count
 
 The country matters: the same page can show 4 image ads for `US` and 8 for `ALL`. Use `ALL` unless you are studying one market.
 
+In the full cycle, everything lives under one **brand umbrella folder**:
+
+```
+spy/Acme/                                   brand umbrella
+├── Acme Image Ads 23.09.2026/              the original link (search or page)
+├── John Doe Image Ads 23.09.2026/          every page that advertises for the brand
+├── Men's Health Lab Image Ads 23.09.2026/
+└── _operation-23.09.2026.md                operation-level synthesis across all of them
+```
+
+```bash
+python harvest.py --url "<link>" --root "spy/Acme" --lang en
+python harvest.py --pages-from "spy/Acme/Acme Image Ads 23.09.2026"      # expansions land in spy/Acme/
+```
+
 ## Output reference
 
 Folders are named automatically as **`<Page name> Image Ads DD.MM.YYYY`** (`Video Ads` / `All Ads` depending on `--media`; for keyword links the search term replaces the page name), so re-harvests on other days never overwrite each other. Files inside use a PascalCase prefix.
@@ -490,6 +505,21 @@ python harvest.py --pages-from "spy/Acme Image Ads 23.09.2026" --lang pt --count
 ```
 
 O país importa: a mesma página pode mostrar 4 anúncios de imagem com `US` e 8 com `ALL`. Use `ALL`, a não ser que o estudo seja de um mercado específico.
+
+No ciclo completo, tudo fica numa **pasta-guarda-chuva da marca**:
+
+```
+spy/Acme/                                   guarda-chuva da marca
+├── Acme Image Ads 23.09.2026/              o link original (busca ou página)
+├── John Doe Image Ads 23.09.2026/          cada página que anuncia para a marca
+├── Men's Health Lab Image Ads 23.09.2026/
+└── _operacao-23.09.2026.md                 síntese da operação inteira
+```
+
+```bash
+python harvest.py --url "<link>" --root "spy/Acme" --lang pt
+python harvest.py --pages-from "spy/Acme/Acme Image Ads 23.09.2026"      # as expansões caem em spy/Acme/
+```
 
 ## Referência da saída
 

@@ -53,6 +53,13 @@ Reference files, read at the step that needs them:
 pulling everything each profile runs?" Recommend the full cycle for keyword searches and for pages that run
 partnership / whitelisted ads (other pages carry part of the volume). The answer decides whether Step 1b runs.
 
+**Full cycle layout:** everything goes under one brand umbrella folder, `<root>/<Brand>/` (PascalCase brand, e.g.
+`spy/UltimaPeak/`): harvest the original link with `--root "<root>/<Brand>"`, then `--pages-from` on that folder
+(its default root is the umbrella), so the umbrella holds `<Link name> Image Ads DD.MM.YYYY/` plus one
+`<Page name> Image Ads DD.MM.YYYY/` per advertiser page, and an operation-level synthesis
+`_operation-DD.MM.YYYY.md` (`_operacao-…` in Portuguese) covering all of them. Single-link pulls stay directly
+under `<root>/`.
+
 For each link the user gives, decide:
 
 | Decision | Rule |

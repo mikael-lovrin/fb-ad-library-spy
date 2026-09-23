@@ -558,7 +558,7 @@ def write_outputs(groups, name, out: Path, source, total, totals, raw, lang, fra
             "profile_active_ads": totals.get(pid), "profile_ads_in_search": ads_per_page[pid],
             "profile_creatives_in_search": creatives_per_page[pid], "ads_with_this_creative": len(g["ads"]),
             "same_image_other_copy": " ".join(c for c in by_image.get(g["img_key"], []) if c != code),
-            "also_in": " ".join(OrderedDict.fromkeys(also_in[a["ad_archive_id"]] for a in g["ads"]
+            "also_in": "; ".join(OrderedDict.fromkeys(also_in[a["ad_archive_id"]] for a in g["ads"]
                                                      if a["ad_archive_id"] in also_in)),
             "format": ad["display_format"] + (f" ({len(ad['cards'])} cards)" if ad["cards"] else ""),
             "live_since": oldest, "days_running": max_days, "platforms": ad["platforms"],
@@ -831,7 +831,8 @@ def main():
         for n, (pid, pname) in enumerate(pages, 1):
             logger.info(f"\n=== [{n}/{len(pages)}] {pname} ({pid})")
             existing = Path(args.root) / folder_name(pname, args.media)
-            if (existing / "data.csv").exists():  # resume: this advertiser was already harvested today
+            if (existing / "data.csv").exists() and f"view_all_page_id={pid}" in (existing / "meta.json").read_text(
+                    encoding="utf-8", errors="replace"):  # resume: this advertiser was already harvested today
                 logger.info(f"  already harvested → {existing.name}, skipping")
                 done.append((pname, existing))
                 continue

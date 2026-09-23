@@ -79,6 +79,7 @@ The spy answers *what the market is running*. The matrix answers *what we will t
 | Collection | Full result sets, not just the first page: SSR payload + intercepted GraphQL pagination until `has_next_page = false` |
 | Filtering | `--media image / video / all` rewrites the link's `media_type` (server-side) and filters client-side, so generic links work; automatic fallback when Meta's filter wrongly returns 0 |
 | Text | Primary text (untruncated), headline, link description, CTA text + type, display domain, landing URL, carousel cards, DCO text variations |
+| Identity | The page shown in the feed **and** the account that pays, so whitelisting through persona, creator and publisher pages is visible |
 | Stats | Advertiser totals, ads per creative, ads per profile in the search, live-since, days running, platforms, rank, caption length, pre-"See more" lines |
 | De-duplication | Perceptual hashing (dHash) of the image or video preview frame + normalised caption; cross-reference of the same image under different captions |
 | Video | MP4 + preview frame, hook frames at 0/1/2/3 s + 4 spread frames (ffmpeg), local timestamped transcription (faster-whisper, free, CPU) |
@@ -183,7 +184,9 @@ spy/
 |---|---|
 | `code` | `<Name>_NNN`, numbered in library order (impressions, when the link sorts by impressions) |
 | `files` | Media files of this creative |
-| `profile`, `profile_url`, `page_id` | Advertiser page |
+| `profile`, `profile_url`, `page_id` | The page shown in the feed (a persona, creator or publisher page on partnership / whitelisted ads) |
+| `advertiser` | The account that pays, when it differs from the page shown (whitelisting) |
+| `partnership` | `yes` for branded-content / partnership ads |
 | `profile_likes`, `profile_category` | Page likes and category |
 | `profile_active_ads` | Advertiser's total active ads, all formats |
 | `profile_ads_in_search` | Advertiser's ads inside this result set |
@@ -413,6 +416,7 @@ O spy responde *o que o mercado está rodando*, a matriz responde *o que vamos t
 | Coleta | Resultado completo, não só a primeira página: conteúdo do HTML inicial + paginação GraphQL interceptada até `has_next_page = false` |
 | Filtro | `--media image / video / all` reescreve o `media_type` do link (filtro no servidor) e filtra de novo localmente, então link genérico funciona; fallback automático quando o filtro da Meta devolve 0 por engano |
 | Texto | Legenda (sem corte), headline, descrição do link, texto e tipo do CTA, domínio exibido, link de destino, cards de carrossel, variações de texto DCO |
+| Identidade | A página exibida no feed **e** a conta que paga, deixando visível o whitelisting por páginas-persona, criadores e publishers |
 | Estatísticas | Total do anunciante, ads por criativo, ads por perfil na busca, data de início, dias no ar, plataformas, posição, tamanho da legenda, linhas antes do "ver mais" |
 | Deduplicação | Hash perceptual (dHash) da imagem ou do frame de capa do vídeo + legenda normalizada; referência cruzada da mesma imagem com legendas diferentes |
 | Vídeo | MP4 + capa, frames do hook em 0/1/2/3 s + 4 frames distribuídos (ffmpeg), transcrição local com timestamps (faster-whisper, grátis, CPU) |
@@ -517,7 +521,9 @@ spy/
 |---|---|
 | `code` | `<Nome>_NNN`, numerado na ordem da biblioteca (impressões, quando o link ordena por impressões) |
 | `files` | Arquivos de mídia do criativo |
-| `profile`, `profile_url`, `page_id` | Página do anunciante |
+| `profile`, `profile_url`, `page_id` | A página que aparece no feed (página-persona, criador ou publisher nos anúncios de parceria / whitelisting) |
+| `advertiser` | A conta que paga, quando é diferente da página exibida (whitelisting) |
+| `partnership` | `yes` para anúncios de parceria / branded content |
 | `profile_likes`, `profile_category` | Curtidas e categoria da página |
 | `profile_active_ads` | Total de anúncios ativos do anunciante, todos os formatos |
 | `profile_ads_in_search` | Anúncios do anunciante dentro deste resultado |

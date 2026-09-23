@@ -91,7 +91,7 @@ LABELS = {
         "same_creative_ads": "Ads using this same creative", "identical": "Headline, button and link identical in all.",
         "transcript": "Video transcript", "frames": "Hook frames", "analysis": "Analysis",
         "collected": "Collected on", "source": "source", "empty": "(empty)", "none": "(no media downloaded)",
-        "likes": "likes", "nocat": "no category",
+        "likes": "likes", "nocat": "no category", "paid_by": "paid by", "partnership": "partnership ad",
         "f_angle": "Angle", "f_angle_category": "Angle category", "f_persona": "Persona / who speaks",
         "f_visual_format": "Visual format", "f_hook": "Hook (visual + first line)", "f_awareness": "Awareness level",
         "f_mechanism": "Mechanism", "f_offer": "Offer / promise", "f_structure": "Caption structure",
@@ -119,7 +119,7 @@ LABELS = {
         "same_creative_ads": "Ads que usam esse mesmo criativo", "identical": "Headline, botão e link idênticos em todos.",
         "transcript": "Transcrição do vídeo", "frames": "Frames do hook", "analysis": "Análise",
         "collected": "Coletado em", "source": "fonte", "empty": "(vazio)", "none": "(sem mídia baixada)",
-        "likes": "curtidas", "nocat": "sem categoria",
+        "likes": "curtidas", "nocat": "sem categoria", "paid_by": "pago por", "partnership": "anúncio de parceria",
         "f_angle": "Ângulo", "f_angle_category": "Categoria do ângulo", "f_persona": "Personagem / quem fala",
         "f_visual_format": "Formato visual", "f_hook": "Hook (visual + 1ª linha)", "f_awareness": "Nível de consciência",
         "f_mechanism": "Mecanismo citado", "f_offer": "Oferta / promessa", "f_structure": "Estrutura da legenda",
@@ -372,7 +372,11 @@ def normalize(item: dict) -> dict:
     return {
         "ad_archive_id": str(item.get("ad_archive_id") or ""),
         "page_id": str(item.get("page_id") or s.get("page_id") or ""),
-        "page_name": item.get("page_name") or s.get("page_name") or "",
+        # page_name = the identity shown in the feed (persona / publisher page on partnership ads);
+        # advertiser = the account that pays, when different (whitelisting / branded content)
+        "page_name": s.get("page_name") or item.get("page_name") or "",
+        "advertiser": item.get("page_name") if item.get("page_name") and item.get("page_name") != s.get("page_name") else "",
+        "partnership": bool(s.get("branded_content")),
         "page_url": s.get("page_profile_uri") or "",
         "page_likes": s.get("page_like_count"),
         "page_categories": ", ".join(s.get("page_categories") or []),
@@ -549,6 +553,7 @@ def write_outputs(groups, name, out: Path, source, total, totals, raw, lang, fra
         chars, before_more = caption_metrics(ad["body"])
         row = {
             "code": code, "files": " ".join(saved), "profile": ad["page_name"], "profile_url": ad["page_url"],
+            "advertiser": ad["advertiser"], "partnership": "yes" if ad["partnership"] else "",
             "page_id": pid, "profile_likes": ad["page_likes"], "profile_category": ad["page_categories"],
             "profile_active_ads": totals.get(pid), "profile_ads_in_search": ads_per_page[pid],
             "profile_creatives_in_search": creatives_per_page[pid], "ads_with_this_creative": len(g["ads"]),
@@ -570,7 +575,9 @@ def write_outputs(groups, name, out: Path, source, total, totals, raw, lang, fra
         md = [
             f"# {code}", "",
             f"**{L['profile']}:** [{ad['page_name']}]({ad['page_url']}) · {ad['page_categories'] or L['nocat']}"
-            f" · {ad['page_likes'] if ad['page_likes'] is not None else '?'} {L['likes']}",
+            f" · {ad['page_likes'] if ad['page_likes'] is not None else '?'} {L['likes']}"
+            + (f" · {L['paid_by']}: **{ad['advertiser']}**" if ad["advertiser"] else "")
+            + (f" · {L['partnership']}" if ad["partnership"] else ""),
             f"**{L['files']}:** {', '.join(saved) or L['none']}",
             f"**{L['library']}:** {ad['library_url']}", "",
             f"## {L['stats']}", "", f"| {L['metric']} | {L['value']} |", "|---|---|",
@@ -669,7 +676,7 @@ def write_index(rows, meta, out: Path, synthesis: str = ""):
     n_ads = sum(int(r["ads_with_this_creative"]) for r in rows)
     pages = OrderedDict()
     for r in rows:
-        p = pages.setdefault(r["page_id"], {"name": r["profile"], "url": r["profile_url"], "creatives": 0,
+        p = pages.setdefault(r["profile"] or r["page_id"], {"name": r["profile"], "url": r["profile_url"], "creatives": 0,
                                             "ads": 0, "total": r["profile_active_ads"], "likes": r["profile_likes"]})
         p["creatives"] += 1
         p["ads"] += int(r["ads_with_this_creative"])
@@ -823,6 +830,11 @@ def main():
         done = []
         for n, (pid, pname) in enumerate(pages, 1):
             logger.info(f"\n=== [{n}/{len(pages)}] {pname} ({pid})")
+            existing = Path(args.root) / folder_name(pname, args.media)
+            if (existing / "data.csv").exists():  # resume: this advertiser was already harvested today
+                logger.info(f"  already harvested → {existing.name}, skipping")
+                done.append((pname, existing))
+                continue
             done.append((pname, run_one(args, url=page_url(pid, args.country), name=pname, also_in=also_in)))
             if n < len(pages):
                 time.sleep(args.delay)
